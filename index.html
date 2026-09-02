@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实习有约 | 大学生实习风险体检</title>
+    <script src="https://unpkg.com/tesseract.js@v5.0.0/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background: #ffffff;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .title-main {
+            font-size: 36px;
+            font-weight: bold;
+            color: #222222;
+            margin-bottom: 12px;
+        }
+        .title-sub {
+            font-size: 18px;
+            color: #666666;
+            margin-bottom: 40px;
+        }
+        .feature-card {
+            background-color: #f5f6f8;
+            border-radius: 16px;
+            padding: 28px 24px;
+            text-align: left;
+            margin-bottom: 32px;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            color: #222;
+            margin: 14px 0;
+            gap: 10px;
+        }
+        .check-icon {
+            color: #28c76f;
+            font-weight: bold;
+            font-size: 22px;
+        }
+        .btn-primary {
+            width: 100%;
+            background-color: #1677ff;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            padding: 18px 0;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        .btn-record {
+            width: 100%;
+            background-color: #eeeeee;
+            color: #555555;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            padding: 16px 0;
+        }
+        .back-link {
+            text-align: left;
+            color: #1677ff;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+        .page-title {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        .scene-item {
+            background-color: #f5f6f8;
+            border-radius: 16px;
+            padding: 22px 24px;
+            text-align: left;
+            margin-bottom: 16px;
+            cursor: pointer;
+        }
+        .scene-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .scene-desc {
+            font-size: 15px;
+            color: #666666;
+        }
+        .eval-card {
+            background: #f5f6f8;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: left;
+        }
+        #sceneTag {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #1677ff;
+        }
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 14px;
+            border: 1px solid #dddddd;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            margin: 16px 0;
+        }
+        .button-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .btn-blue {
+            background: #1677ff;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-green {
+            background: #27ae60;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-purple {
+            background: #9b59b6;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #previewWrap img {
+            max-width: 220px;
+            margin: 10px 0;
+            border: 1px solid #eeeeee;
+            border-radius: 8px;
+        }
+        #loading {
+            color: #ff6b35;
+            display: none;
+            margin: 8px 0;
+        }
+        #ocrTip{
+            color:#f5222d;
+            margin:6px 0;
+        }
+        #result {
+            white-space: pre-wrap;
+            padding: 16px;
+            background: #e8f4ff;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            line-height: 1.7;
+        }
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="pageHome" class="page active">
+        <div class="title-main">实习有约</div>
+        <div class="title-sub">实习兼职前，先约好，再出发</div>
+        <div class="feature-card">
+            <div class="feature-item">
+                <span class="check-icon">✅</span>
+                <span>入职前风险体检评估</span>
+            </div>
+            <div class="feature-item">
+                <span class="check-icon">✅</span>
+                <span>生成事前事项确认卡</span>
+            </div>
+            <div class="feature-item">
+                <span class="check-icon">✅</span>
+                <span>实习全程工时证据留痕</span>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="goScene()">开始风险体检</button>
+        <button class="btn-record">我的记录 / 约定卡</button>
+    </div>
+
+    <div id="pageScene" class="page">
+        <div class="back-link" onclick="goHome()">← 返回首页</div>
+        <div class="page-title">选择工作场景</div>
+        <div class="scene-item" onclick="goEval('实习')">
+            <div class="scene-name">实习</div>
+            <div class="scene-desc">常见风险：补贴拖欠、无书面协议</div>
+        </div>
+        <div class="scene-item" onclick="goEval('兼职')">
+            <div class="scene-name">兼职</div>
+            <div class="scene-desc">常见风险：押金、扣费、结算模糊</div>
+        </div>
+        <div class="scene-item" onclick="goEval('线上接单')">
+            <div class="scene-name">线上接单</div>
+            <div class="scene-desc">常见风险：先垫资、雇主身份不明</div>
+        </div>
+    </div>
+
+    <div id="pageEval" class="page">
+        <div class="back-link" onclick="goScene()">← 返回选择场景</div>
+        <div class="page-title">岗位信息录入</div>
+        <div id="sceneTag">当前场景：实习</div>
+        <div class="eval-card">
+            <textarea id="jobText" placeholder="手动粘贴/输入招聘岗位描述..."></textarea>
+            <div class="button-row">
+                <label for="imgUpload" class="btn-blue">上传岗位截图识别文字</label>
+                <input type="file" id="imgUpload" accept="image/*">
+                <button class="btn-green" onclick="generateReport()">生成AI风险评估报告</button>
+                <button class="btn-purple" onclick="exportPdf()">导出PDF报告</button>
+            </div>
+            <div id="previewWrap"></div>
+            <div id="loading">识别中，请稍候...</div>
+            <div id="ocrTip"></div>
+        </div>
+        <div id="result">
+            <h3>📋 风险评估报告</h3>
+            <div id="reportContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const pages = {
+    home: document.getElementById("pageHome"),
+    scene: document.getElementById("pageScene"),
+    eval: document.getElementById("pageEval")
+};
+function clearPage(){
+    Object.values(pages).forEach(p=>p.classList.remove("active"));
+}
+function goHome(){clearPage();pages.home.classList.add("active");}
+function goScene(){clearPage();pages.scene.classList.add("active");}
+function goEval(type){
+    clearPage();
+    pages.eval.classList.add("active");
+    document.getElementById("sceneTag").innerText = "当前场景：" + type;
+    document.getElementById("ocrTip").innerText = "";
+    document.getElementById("previewWrap").innerHTML = "";
+    document.getElementById("result").style.display = "none";
+}
+
+const jobTextDom = document.getElementById('jobText');
+const uploadDom = document.getElementById('imgUpload');
+const previewWrap = document.getElementById('previewWrap');
+const loadingDom = document.getElementById('loading');
+const ocrTipDom = document.getElementById('ocrTip');
+const resultDom = document.getElementById('result');
+const reportDom = document.getElementById('reportContent');
+
+uploadDom.addEventListener('change',async function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    previewWrap.innerHTML = "";
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    previewWrap.appendChild(img);
+    loadingDom.style.display = 'block';
+    ocrTipDom.innerText = "";
+
+    let timeoutFlag = false;
+    const timeOutTask = setTimeout(()=>{
+        timeoutFlag = true;
+        loadingDom.style.display = 'none';
+        ocrTipDom.innerText = "⚠️识别超时，请手动填写岗位信息";
+    },15000);
+
+    try{
+        const res = await Promise.race([
+            Tesseract.recognize(file,'chi_sim+eng'),
+            new Promise((_, reject)=>setTimeout(()=>reject("timeout"),15000))
+        ]);
+        clearTimeout(timeOutTask);
+        if(timeoutFlag) return;
+        const text = res.data.text.trim();
+        if(text.length < 12){
+            ocrTipDom.innerText = "⚠️图片识别不清晰，请切换为手动输入";
+        }else{
+            jobTextDom.value = text;
+            ocrTipDom.innerText = "✅识别成功，已自动填充内容";
+        }
+    }catch(err){
+        clearTimeout(timeOutTask);
+        ocrTipDom.innerText = "⚠️识别失败，请手动填写岗位信息";
+    }
+    loadingDom.style.display = 'none';
+})
+
+// 本地兜底风险词库
+const riskRule = [
+    {keyword:"押金",level:"高风险",tip:"正规实习兼职不会提前收取费用"},
+    {keyword:"保证金",level:"高风险",tip:"正规实习兼职不会提前收取费用"},
+    {keyword:"入职费",level:"高风险",tip:"正规实习兼职不会提前收取费用"},
+    {keyword:"保障金",level:"高风险",tip:"正规实习兼职不会提前收取费用"},
+    {keyword:"服务费",level:"高风险",tip:"正规实习兼职不会收取服务费"},
+    {keyword:"建档费",level:"高风险",tip:"正规企业不会收取建档费用"},
+    {keyword:"服装费",level:"高风险",tip:"警惕以服装为由收取钱款"},
+    {keyword:"培训费",level:"高风险",tip:"谨防收费培训的求职骗局"},
+    {keyword:"垫付",level:"高风险",tip:"刷单返利诈骗典型话术，切勿转账"},
+    {keyword:"回款",level:"高风险",tip:"刷单返利诈骗典型话术，切勿转账"},
+    {keyword:"连单",level:"高风险",tip:"刷单返利诈骗典型话术，切勿转账"},
+    {keyword:"任务单",level:"高风险",tip:"刷单返利诈骗典型话术，切勿转账"},
+    {keyword:"佣金",level:"中等风险",tip:"警惕刷单类高额佣金诱惑"},
+    {keyword:"充值解冻",level:"极高风险",tip:"属于电信诈骗，绝对不要转账"},
+    {keyword:"境外工作",level:"极高风险",tip:"疑似电信诈骗园区招工"},
+    {keyword:"出国务工",level:"极高风险",tip:"警惕境外高薪黑招工"},
+    {keyword:"海外高薪",level:"极高风险",tip:"警惕境外高薪黑招工"},
+    {keyword:"边境工作",level:"极高风险",tip:"警惕违法境外就业陷阱"},
+    {keyword:"走账",level:"极高风险",tip:"涉嫌帮信罪，出租转账违法"},
+    {keyword:"代收",level:"极高风险",tip:"涉嫌帮信罪，出租转账违法"},
+    {keyword:"刷流水",level:"极高风险",tip:"银行卡刷流水属于违法行为"},
+    {keyword:"跑分",level:"极高风险",tip:"涉嫌帮信犯罪，触犯法律"},
+    {keyword:"出借银行卡",level:"极高风险",tip:"出借银行卡涉嫌违法犯罪"},
+    {keyword:"日赚几百",level:"高风险",tip:"高薪轻松兼职基本都是骗局"},
+    {keyword:"在家日结",level:"中等风险",tip:"警惕无门槛高薪兼职套路"},
+    {keyword:"无需面试",level:"中等风险",tip:"正规用工一般会安排面试"},
+    {keyword:"轻松高薪",level:"高风险",tip:"低门槛高薪岗位大概率是骗局"},
+    {keyword:"口头承诺薪资",level:"中等风险",tip:"务必签订书面劳务协议"}
+]
+
+// =====================后端接口占位，后续替换云函数地址=====================
+const API_URL = "后端云函数地址";
+
+async function generateReport(){
+    const content = jobTextDom.value.trim();
+    if(!content){
+        alert("请手动填写岗位信息，或者上传截图识别文字！");
+        return;
+    }
+    resultDom.style.display = "block";
+    reportDom.innerText = "正在调用AI进行智能风险分析……";
+    try{
+        const resp = await fetch(API_URL,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({text:content})
+        })
+        const data = await resp.json();
+        reportDom.innerText = data.result;
+    }catch(err){
+        // AI失效，自动切换本地规则评估
+        let riskList = [];
+        riskRule.forEach(item=>{
+            if(content.includes(item.keyword)) riskList.push(item);
+        })
+        let finalText = `【AI服务暂不可用，启用本地规则评估模式】
+原始岗位文本：
+${content}
+
+风险检测结果：
+`;
+        if(riskList.length === 0){
+            finalText += "✅ 暂未识别到明显诈骗风险\n建议：自行核验企业资质，留存用工凭证。";
+        }else{
+            riskList.forEach(r=>{
+                finalText += `【${r.level}】风险提示：${r.tip}\n`
+            })
+        }
+        reportDom.innerText = finalText;
+    }
+}
+
+function exportPdf(){
+    if(resultDom.style.display === "none"){
+        alert("请先生成风险评估报告，再导出PDF！");
+        return;
+    }
+    const opt = {
+        margin:10,
+        filename:'实习风险评估报告.pdf',
+        image:{type:'jpeg',quality:0.98},
+        html2canvas:{scale:2},
+        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+    };
+    html2pdf().set(opt).from(resultDom).save();
+}
+</script>
+</body>
+</html>
